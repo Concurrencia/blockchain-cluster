@@ -13,4 +13,6 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-tmp/blocks/
+tmp/blocks0/*
+tmp/blocks1/*
+tmp/blocks2/*

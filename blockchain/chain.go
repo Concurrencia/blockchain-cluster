@@ -8,10 +8,6 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
-const (
-	dbPath = "./tmp/blocks"
-)
-
 type BlockChain struct {
 	LastHash []byte
 	Database *badger.DB
@@ -22,13 +18,16 @@ type BlockChainIterator struct {
 	Database    *badger.DB
 }
 
-func InitBlockChain() *BlockChain {
+func InitBlockChain(numNode string) *BlockChain {
 	var lastHash []byte
+
+	dbPath := "./tmp/blocks" + numNode
 
 	opts := badger.DefaultOptions("")
 	opts.Dir = dbPath
 	opts.ValueDir = dbPath
 	opts.Truncate = true
+	opts.ValueLogFileSize = 1024 * 1024 * 30
 
 	db, err := badger.Open(opts)
 	Handle(err)
