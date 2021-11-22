@@ -53,18 +53,23 @@ func createConsult(con net.Conn, chain *blockchain.BlockChain) {
 	newConsult := models.Consultation{}
 	err := json.Unmarshal([]byte(consult), &newConsult)
 	blockchain.Handle(err)
-	fmt.Println("Consultation:", newConsult)
+
 	bytes, _ := hex.DecodeString(userHash)
 	block := chain.GetBlock(bytes)
 
-	id := len(block.Data.Consultations) + 1
-	newConsult.ID = id
-	newConsult.UserId = hex.EncodeToString(block.Hash)
-	block.Data.Consultations = append(block.Data.Consultations, newConsult)
-	chain.UpdateBlock(block.Hash, block)
+	if block == nil {
+		fmt.Fprintln(con, "nil")
+	} else {
+		fmt.Fprintln(con, "")
+		id := len(block.Data.Consultations) + 1
+		newConsult.ID = id
+		newConsult.UserID = hex.EncodeToString(block.Hash)
+		block.Data.Consultations = append(block.Data.Consultations, newConsult)
+		chain.UpdateBlock(block.Hash, block)
 
-	byteInfo, _ := json.Marshal(newConsult)
-	fmt.Fprintln(con, string(byteInfo))
+		byteInfo, _ := json.Marshal(newConsult)
+		fmt.Fprintln(con, string(byteInfo))
+	}
 }
 
 func getAllConsults(con net.Conn, chain *blockchain.BlockChain) {
