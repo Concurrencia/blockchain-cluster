@@ -117,6 +117,21 @@ func (chain *BlockChain) GetBlock(userHash []byte) *Block {
 	return block
 }
 
+func (chain *BlockChain) AddCreatedBlock(newBlock *Block) {
+
+	err := chain.Database.Update(func(txn *badger.Txn) error {
+		err := txn.Set(newBlock.Hash, newBlock.Serialize())
+		Handle(err)
+		err = txn.Set([]byte("lh"), newBlock.Hash)
+
+		chain.LastHash = newBlock.Hash
+
+		return err
+	})
+
+	Handle(err)
+}
+
 func (chain *BlockChain) UpdateBlock(userHash []byte, block *Block) *Block {
 
 	err := chain.Database.Update(func(txn *badger.Txn) error {

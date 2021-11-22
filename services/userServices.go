@@ -11,49 +11,8 @@ import (
 	"strings"
 )
 
-func ActivarServicioCreateUser(chain *blockchain.BlockChain) {
-	ln, _ := net.Listen("tcp", "localhost:9000")
-	defer ln.Close()
+func createUser(con net.Conn, chain *blockchain.BlockChain, bufferIn *bufio.Reader) {
 
-	for {
-		con, _ := ln.Accept()
-		go createUser(con, chain)
-	}
-}
-
-func ActivarServicioGetAllUsers(chain *blockchain.BlockChain) {
-	ln, _ := net.Listen("tcp", "localhost:9001")
-	defer ln.Close()
-
-	for {
-		con, _ := ln.Accept()
-		go getAllUsers(con, chain)
-	}
-}
-
-func ActivarServicioGetUserById(chain *blockchain.BlockChain) {
-	ln, _ := net.Listen("tcp", "localhost:9002")
-	defer ln.Close()
-
-	for {
-		con, _ := ln.Accept()
-		go getUserById(con, chain)
-	}
-}
-
-func ActivarServicioGetUserByEmailAndPassword(chain *blockchain.BlockChain) {
-	ln, _ := net.Listen("tcp", "localhost:9003")
-	defer ln.Close()
-
-	for {
-		con, _ := ln.Accept()
-		go getUserByEmailAndPassword(con, chain)
-	}
-}
-
-func createUser(con net.Conn, chain *blockchain.BlockChain) {
-	defer con.Close()
-	bufferIn := bufio.NewReader(con)
 	msg, _ := bufferIn.ReadString('\n')
 	msg = strings.TrimSpace(msg)
 
@@ -67,10 +26,11 @@ func createUser(con net.Conn, chain *blockchain.BlockChain) {
 
 	hashID := hex.EncodeToString(block.Hash)
 	fmt.Fprintln(con, hashID)
+
+	sendChainUpdate(block)
 }
 
-func getAllUsers(con net.Conn, chain *blockchain.BlockChain) {
-	defer con.Close()
+func getAllUsers(con net.Conn, chain *blockchain.BlockChain, bufferIn *bufio.Reader) {
 
 	users := []models.UserResponse{}
 
@@ -96,10 +56,9 @@ func getAllUsers(con net.Conn, chain *blockchain.BlockChain) {
 	fmt.Fprintln(con, string(byteInfo))
 }
 
-func getUserById(con net.Conn, chain *blockchain.BlockChain) {
-	defer con.Close()
+func getUserById(con net.Conn, chain *blockchain.BlockChain, bufferIn *bufio.Reader) {
+
 	blockchain.PrintAllChain(chain)
-	bufferIn := bufio.NewReader(con)
 	msg, _ := bufferIn.ReadString('\n')
 	fmt.Println("msg:", msg)
 
@@ -123,10 +82,9 @@ func getUserById(con net.Conn, chain *blockchain.BlockChain) {
 
 }
 
-func getUserByEmailAndPassword(con net.Conn, chain *blockchain.BlockChain) {
-	defer con.Close()
+func getUserByEmailAndPassword(con net.Conn, chain *blockchain.BlockChain, bufferIn *bufio.Reader) {
+
 	blockchain.PrintAllChain(chain)
-	bufferIn := bufio.NewReader(con)
 	email, _ := bufferIn.ReadString('\n')
 	email = strings.TrimSpace(email)
 	password, _ := bufferIn.ReadString('\n')

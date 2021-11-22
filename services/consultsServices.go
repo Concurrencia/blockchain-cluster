@@ -11,40 +11,9 @@ import (
 	"strings"
 )
 
-func ActivarServicioGetAllConsults(chain *blockchain.BlockChain) {
-	ln, _ := net.Listen("tcp", "localhost:9010")
-	defer ln.Close()
+func createConsult(con net.Conn, chain *blockchain.BlockChain, bufferIn *bufio.Reader) {
 
-	for {
-		con, _ := ln.Accept()
-		go getAllConsults(con, chain)
-	}
-}
-
-func ActivarServicioCreateConsults(chain *blockchain.BlockChain) {
-	ln, _ := net.Listen("tcp", "localhost:9011")
-	defer ln.Close()
-
-	for {
-		con, _ := ln.Accept()
-		go createConsult(con, chain)
-	}
-}
-
-func ActivarServicioGetAllConsultsByUserId(chain *blockchain.BlockChain) {
-	ln, _ := net.Listen("tcp", "localhost:9012")
-	defer ln.Close()
-
-	for {
-		con, _ := ln.Accept()
-		go getAllConsultsByUserId(con, chain)
-	}
-}
-
-func createConsult(con net.Conn, chain *blockchain.BlockChain) {
-	defer con.Close()
 	blockchain.PrintAllChain(chain)
-	bufferIn := bufio.NewReader(con)
 	userHash, _ := bufferIn.ReadString('\n')
 
 	consult, _ := bufferIn.ReadString('\n')
@@ -69,11 +38,12 @@ func createConsult(con net.Conn, chain *blockchain.BlockChain) {
 
 		byteInfo, _ := json.Marshal(newConsult)
 		fmt.Fprintln(con, string(byteInfo))
+
+		sendChainUpdate(block)
 	}
 }
 
-func getAllConsults(con net.Conn, chain *blockchain.BlockChain) {
-	defer con.Close()
+func getAllConsults(con net.Conn, chain *blockchain.BlockChain, bufferIn *bufio.Reader) {
 
 	consultation := []models.Consultation{}
 
@@ -93,11 +63,9 @@ func getAllConsults(con net.Conn, chain *blockchain.BlockChain) {
 	fmt.Fprintln(con, string(byteInfo))
 }
 
-func getAllConsultsByUserId(con net.Conn, chain *blockchain.BlockChain) {
+func getAllConsultsByUserId(con net.Conn, chain *blockchain.BlockChain, bufferIn *bufio.Reader) {
 
-	defer con.Close()
 	blockchain.PrintAllChain(chain)
-	bufferIn := bufio.NewReader(con)
 	msg, _ := bufferIn.ReadString('\n')
 	fmt.Println("msg:", msg)
 
