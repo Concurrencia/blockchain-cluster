@@ -16,3 +16,7 @@
 tmp/blocks0/*
 tmp/blocks1/*
 tmp/blocks2/*
+
+!tmp/blocks2/placeholder.txt
+!tmp/blocks1/placeholder.txt
+!tmp/blocks0/placeholder.txt
